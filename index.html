@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTT Check & Graduação</title>
+    
+    <!-- Configurações PWA (Aplicativo Web Progressivo) -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0284c7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="BTT Check">
+    <link rel="apple-touch-icon" href="logo.png">
+
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .logo-oficial {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .home-logo-img {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent);
+            margin: 0 auto 15px auto;
+            display: block;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TELA DE SELEÇÃO INICIAL (PASSO 1: LOCALIDADE -> PASSO 2: TURMA) -->
+    <div id="homeScreen" class="screen-overlay">
+        <div class="home-container" style="text-align: center;">
+            <img src="logo.png" alt="BTT Logo" class="home-logo-img" onerror="this.src='input_file_0.png'">
+            <h1 class="home-logo" style="margin-top: 0;">BTT <span>Check</span></h1>
+            
+            <!-- ETAPA 1: LOCALIDADE -->
+            <div id="etapaLocalidade">
+                <div class="turmas-grid grid-4" style="margin-top: 1.5rem;">
+                    <div class="turma-card" onclick="selecionarLocalidadePasso('São Miguel')">
+                        <h3>São Miguel</h3>
+                    </div>
+                    <div class="turma-card" onclick="selecionarLocalidadePasso('Pereiro')">
+                        <h3>Pereiro</h3>
+                    </div>
+                    <div class="turma-card" onclick="selecionarLocalidadePasso('Coronel')">
+                        <h3>Coronel</h3>
+                    </div>
+                    <div class="turma-card" onclick="selecionarLocalidadePasso('Sitio CIdade')">
+                        <h3>Sítio Cidade</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ETAPA 2: TURMA (Oculta inicialmente) -->
+            <div id="etapaTurma" style="display: none;">
+                <div style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 1rem;">
+                    <button class="btn btn-secondary btn-sm" onclick="voltarParaLocalidade()">Alterar Local</button>
+                </div>
+                <div class="turmas-grid">
+                    <div class="turma-card faixa-azul" onclick="selecionarTurmaPasso('Adulto')">
+                        <h3>Adulto</h3>
+                    </div>
+                    <div class="turma-card faixa-amarelo" onclick="selecionarTurmaPasso('Juvenil')">
+                        <h3>Juvenil</h3>
+                    </div>
+                    <div class="turma-card faixa-verde" onclick="selecionarTurmaPasso('Kids')">
+                        <h3>Kids</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- APLICAÇÃO PRINCIPAL -->
+    <div id="appContainer" style="display: none;">
+        <!-- BARRA LATERAL (MENU) -->
+        <aside>
+            <div>
+                <div class="logo">
+                    <img src="logo.png" alt="BTT" class="logo-oficial" onerror="this.src='input_file_0.png'">
+                    <span>BTT</span> Check
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <span id="badgeLocal" class="turma-badge-header">São Miguel</span>
+                    <span id="badgeTurma" class="turma-badge-header" style="margin-top: 4px;">Adulto</span>
+                </div>
+                <ul class="menu">
+                    <li><button onclick="mudarAba('scanner')" id="btnTabScanner" class="active">Check Diário</button></li>
+                    <li><button onclick="mudarAba('cadastro')" id="btnTabCadastro">Cadastrar Aluno</button></li>
+                    <li><button onclick="mudarAba('relatorio')" id="btnTabRelatorio">Relatório & Graduação</button></li>
+                </ul>
+            </div>
+            <div>
+                <button class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 1rem;" onclick="voltarHome()">Trocar Local / Turma</button>
+            </div>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main>
+            <header>
+                <h1 id="tituloPagina">Check Diário de Presença</h1>
+                <span id="dataAtual" style="color: var(--text-muted); font-size: 0.9rem;"></span>
+            </header>
+
+            <!-- ABA 1: CHECK DIÁRIO -->
+            <div id="scanner" class="tab-content active">
+                <div class="card">
+                    <div style="display: flex; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap;">
+                        <input type="text" id="buscaAluno" class="form-control" placeholder="Buscar aluno por nome..." oninput="filtrarAlunos()" style="flex: 1; min-width: 200px;">
+                        <select id="filtroFaixa" class="form-control" onchange="filtrarAlunos()" style="width: 180px;">
+                            <option value="">Todas as Faixas</option>
+                            <option value="Faixa Branca">Faixa Branca</option>
+                            <option value="Cinza e Branca">Cinza e Branca</option>
+                            <option value="Cinza">Cinza</option>
+                            <option value="Cinza e Preta">Cinza e Preta</option>
+                            <option value="Amarela e Branca">Amarela e Branca</option>
+                            <option value="Amarela">Amarela</option>
+                            <option value="Amarela e Preta">Amarela e Preta</option>
+                            <option value="Laranja e Branca">Laranja e Branca</option>
+                            <option value="Laranja">Laranja</option>
+                            <option value="Laranja e Preta">Laranja e Preta</option>
+                            <option value="Verde e Branca">Verde e Branca</option>
+                            <option value="Verde">Verde</option>
+                            <option value="Verde e Preta">Verde e Preta</option>
+                            <option value="Faixa Azul">Faixa Azul</option>
+                            <option value="Faixa Roxa">Faixa Roxa</option>
+                            <option value="Faixa Marrom">Faixa Marrom</option>
+                            <option value="Faixa Preta">Faixa Preta</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                        <button class="btn btn-secondary btn-sm" onclick="marcarTodos(true)">Marcar Todos</button>
+                        <button class="btn btn-secondary btn-sm" onclick="marcarTodos(false)">Desmarcar Todos</button>
+                        <button class="btn btn-danger btn-sm" onclick="fecharDia()">Fechar o Dia</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Lista de Chamada</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Aluno / Progresso do Dia</th>
+                                    <th style="text-align: right;">Ação de Presença</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaChamadaBody">
+                                <!-- Preenchido via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA 2: CADASTRAR ALUNO -->
+            <div id="cadastro" class="tab-content">
+                <div class="card" style="max-width: 600px; margin: 0 auto; width: 100%;">
+                    <h3>Cadastrar Novo Aluno</h3>
+                    <form id="formCadastro" onsubmit="cadastrarAluno(event)">
+                        <div class="form-group">
+                            <label>Nome Completo do Aluno</label>
+                            <input type="text" id="cadNome" class="form-control" placeholder="Ex: João da Silva" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Faixa Atual</label>
+                            <select id="cadFaixa" class="form-control">
+                                <option value="Faixa Branca">Faixa Branca</option>
+                                <option value="Cinza e Branca">Cinza e Branca</option>
+                                <option value="Cinza">Cinza</option>
+                                <option value="Cinza e Preta">Cinza e Preta</option>
+                                <option value="Amarela e Branca">Amarela e Branca</option>
+                                <option value="Amarela">Amarela</option>
+                                <option value="Amarela e Preta">Amarela e Preta</option>
+                                <option value="Laranja e Branca">Laranja e Branca</option>
+                                <option value="Laranja">Laranja</option>
+                                <option value="Laranja e Preta">Laranja e Preta</option>
+                                <option value="Verde e Branca">Verde e Branca</option>
+                                <option value="Verde">Verde</option>
+                                <option value="Verde e Preta">Verde e Preta</option>
+                                <option value="Faixa Azul">Faixa Azul</option>
+                                <option value="Faixa Roxa">Faixa Roxa</option>
+                                <option value="Faixa Marrom">Faixa Marrom</option>
+                                <option value="Faixa Preta">Faixa Preta</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 12px; width: 100%;">
+                            <div class="form-group" style="flex: 1;">
+                                <label>Graus Atuais (0 a 4)</label>
+                                <input type="number" id="cadGraus" class="form-control" min="0" max="4" value="0">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Dias Acumulados (Presenças)</label>
+                                <input type="number" id="cadDias" class="form-control" min="0" value="0">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">Salvar Novo Aluno</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ABA 3: RELATÓRIO & GRADUAÇÃO -->
+            <div id="relatorio" class="tab-content">
+                <div class="card">
+                    <h3>Relatório Geral da Turma & Progresso para Graduação</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Aluno</th>
+                                    <th>Faixa & Grau</th>
+                                    <th>Progresso (Presenças)</th>
+                                    <th style="text-align: right;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaRelatorioBody">
+                                <!-- Preenchido via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbxKiPYTCPrQcU8b10SyW1M7WfLgTwyJnyjp6SW-i_RO13Iw2d4izcevp2h8y9PGTqf2/exec";
+
+        let estadoApp = {
+            turma: "Adulto",       
+            localidade: "São Miguel" 
+        };
+
+        let listaAlunos = [];
+
+        document.getElementById('dataAtual').innerText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+        function selecionarLocalidadePasso(local) {
+            estadoApp.localidade = local;
+            document.getElementById('etapaLocalidade').style.display = 'none';
+            document.getElementById('etapaTurma').style.display = 'block';
+        }
+
+        function voltarParaLocalidade() {
+            document.getElementById('etapaTurma').style.display = 'none';
+            document.getElementById('etapaLocalidade').style.display = 'block';
+        }
+
+        function selecionarTurmaPasso(turma) {
+            estadoApp.turma = turma;
+            verificarInicio();
+        }
+
+        function verificarInicio() {
+            document.getElementById('badgeTurma').innerText = estadoApp.turma;
+            document.getElementById('badgeLocal').innerText = estadoApp.localidade;
+            
+            document.getElementById('homeScreen').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'flex';
+            
+            carregarAlunosDaPlanilha();
+        }
+
+        function voltarHome() {
+            document.getElementById('appContainer').style.display = 'none';
+            document.getElementById('etapaTurma').style.display = 'none';
+            document.getElementById('etapaLocalidade').style.display = 'block';
+            document.getElementById('homeScreen').style.display = 'flex';
+        }
+
+        function mudarAba(abaId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.menu button').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(abaId).classList.add('active');
+            document.getElementById('btnTab' + abaId.charAt(0).toUpperCase() + abaId.slice(1)).classList.add('active');
+
+            if(abaId === 'relatorio') renderizarRelatorio();
+            if(abaId === 'scanner') renderizarScanner();
+        }
+
+        async function carregarAlunosDaPlanilha() {
+            try {
+                let url = `${API_URL}?action=ler&turma=${encodeURIComponent(estadoApp.turma)}&localidade=${encodeURIComponent(estadoApp.localidade)}`;
+                let resposta = await fetch(url);
+                let dadosCru = await resposta.json();
+                
+                listaAlunos = dadosCru.map(item => ({
+                    id: item.id || item.ID || item.Id,
+                    nome: item.nome || item.Nome || item.NOME,
+                    faixa: item.faixa || item.Faixa || item.FAIXA,
+                    graus: parseInt(item.graus || item.Graus || item.GRAUS || 0),
+                    dias: parseInt(item.dias || item.Dias || item.DIAS || 0),
+                    presencasHoje: String(item.presencasHoje || item.PresencasHoje || item.PRESENCASHOJE || false).toLowerCase() === 'true',
+                    localidade: item.localidade || item.Localidade || item.LOCALIDADE
+                }));
+                
+                renderizarScanner();
+            } catch (erro) {
+                console.error("Erro ao carregar dados da planilha:", erro);
+                listaAlunos = [];
+                renderizarScanner();
+            }
+        }
+
+        async function salvarAlunoNaPlanilha(alunoObj) {
+            try {
+                alunoObj.localidade = estadoApp.localidade;
+                let resposta = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        turma: estadoApp.turma,
+                        acao: "salvar",
+                        aluno: alunoObj
+                    })
+                });
+                let res = await resposta.json();
+                if(res.status === "sucesso") {
+                    carregarAlunosDaPlanilha();
+                }
+            } catch (erro) {
+                console.error("Erro ao salvar:", erro);
+            }
+        }
+
+        async function atualizarAlunoNaPlanilha(alunoObj) {
+            try {
+                await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        turma: estadoApp.turma,
+                        acao: "atualizar",
+                        aluno: alunoObj
+                    })
+                });
+            } catch (erro) {
+                console.error("Erro ao atualizar:", erro);
+            }
+        }
+
+        function renderizarScanner() {
+            const tbody = document.getElementById('tabelaChamadaBody');
+            tbody.innerHTML = '';
+
+            if(listaAlunos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color: var(--text-muted);">Nenhum aluno cadastrado nesta categoria/localidade.</td></tr>`;
+                return;
+            }
+
+            listaAlunos.forEach(aluno => {
+                let tr = document.createElement('tr');
+                let percentual = Math.min(100, Math.round((aluno.dias / 120) * 100));
+                
+                tr.innerHTML = `
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="faixa-indicador ind-${obterClasseCorFaixa(aluno.faixa)}"></span>
+                            <strong>${aluno.nome || 'Sem Nome'}</strong>
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">(${aluno.dias}/120d)</span>
+                        </div>
+                        <div class="progress-container" style="margin-top: 6px;">
+                            <div class="progress-bar-fill bar-${obterClasseCorFaixa(aluno.faixa)}" style="width: ${percentual}%;"></div>
+                            <div class="progress-text">${percentual}%</div>
+                        </div>
+                    </td>
+                    <td style="text-align: right;">
+                        <button class="btn btn-sm ${aluno.presencasHoje ? 'btn-danger' : 'btn'}" onclick="alternarPresenca('${aluno.id}')">
+                            ${aluno.presencasHoje ? 'Presença Confirmada (Remover)' : 'Dar Check'}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderizarRelatorio() {
+            const tbody = document.getElementById('tabelaRelatorioBody');
+            tbody.innerHTML = '';
+
+            listaAlunos.forEach(aluno => {
+                let tr = document.createElement('tr');
+                let percentual = Math.min(100, Math.round((aluno.dias / 120) * 100));
+
+                tr.innerHTML = `
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="faixa-indicador ind-${obterClasseCorFaixa(aluno.faixa)}"></span>
+                            <strong>${aluno.nome || 'Sem Nome'}</strong>
+                        </div>
+                    </td>
+                    <td>${aluno.faixa || 'Faixa Branca'} (${aluno.graus || 0}º Grau)</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span>${aluno.dias}/120 dias</span>
+                            <div class="progress-container" style="width: 100px;">
+                                <div class="progress-bar-fill bar-${obterClasseCorFaixa(aluno.faixa)}" style="width: ${percentual}%;"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="text-align: right;">
+                        <button class="btn btn-secondary btn-sm" onclick="editarAluno('${aluno.id}')">Editar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function cadastrarAluno(e) {
+            e.preventDefault();
+            let novo = {
+                nome: document.getElementById('cadNome').value,
+                faixa: document.getElementById('cadFaixa').value,
+                graus: parseInt(document.getElementById('cadGraus').value) || 0,
+                dias: parseInt(document.getElementById('cadDias').value) || 0,
+                presencasHoje: false
+            };
+
+            salvarAlunoNaPlanilha(novo);
+            document.getElementById('formCadastro').reset();
+            alert("Aluno cadastrado com sucesso!");
+            mudarAba('scanner');
+        }
+
+        function alternarPresenca(id) {
+            let aluno = listaAlunos.find(a => a.id == id);
+            if(aluno) {
+                aluno.presencasHoje = !aluno.presencasHoje;
+                aluno.dias = aluno.presencasHoje ? aluno.dias + 1 : Math.max(0, aluno.dias - 1);
+                
+                atualizarAlunoNaPlanilha(aluno);
+                renderizarScanner();
+            }
+        }
+
+        function filtrarAlunos() {
+            let termo = document.getElementById('buscaAluno').value.toLowerCase();
+            let rows = document.querySelectorAll('#tabelaChamadaBody tr');
+            rows.forEach(row => {
+                let texto = row.innerText.toLowerCase();
+                row.style.display = texto.includes(termo) ? '' : 'none';
+            });
+        }
+
+        function marcarTodos(status) {
+            listaAlunos.forEach(aluno => {
+                if(aluno.presencasHoje !== status) {
+                    aluno.presencasHoje = status;
+                    aluno.dias = status ? aluno.dias + 1 : Math.max(0, aluno.dias - 1);
+                    atualizarAlunoNaPlanilha(aluno);
+                }
+            });
+            renderizarScanner();
+        }
+
+        function fecharDia() {
+            if(confirm("Deseja fechar o dia e resetar as presenças de confirmação?")) {
+                listaAlunos.forEach(aluno => {
+                    aluno.presencasHoje = false;
+                    atualizarAlunoNaPlanilha(aluno);
+                });
+                renderizarScanner();
+                alert("Dia fechado com sucesso!");
+            }
+        }
+
+        function editarAluno(id) {
+            let aluno = listaAlunos.find(a => a.id == id);
+            if(!aluno) return;
+            
+            let novoNome = prompt("Editar Nome do Aluno:", aluno.nome);
+            if(novoNome === null) return;
+            
+            let novaFaixa = prompt("Editar Faixa:", aluno.faixa);
+            if(novaFaixa === null) return;
+
+            let novosGraus = prompt("Editar Graus Atuais (0 a 4):", aluno.graus);
+            if(novosGraus === null) return;
+
+            let novosDias = prompt("Editar Dias Acumulados (Presenças):", aluno.dias);
+            if(novosDias === null) return;
+
+            aluno.nome = novoNome.trim();
+            aluno.faixa = novaFaixa.trim();
+            aluno.graus = parseInt(novosGraus) || 0;
+            aluno.dias = parseInt(novosDias) || 0;
+
+            atualizarAlunoNaPlanilha(aluno);
+            renderizarRelatorio();
+            alert("Aluno atualizado com sucesso!");
+        }
+
+        function obterClasseCorFaixa(faixa) {
+            if(!faixa) return 'branca';
+            faixa = faixa.toLowerCase();
+            if(faixa.includes('cinza')) return 'cinza';
+            if(faixa.includes('amarela')) return 'amarela';
+            if(faixa.includes('laranja')) return 'laranja';
+            if(faixa.includes('verde')) return 'verde';
+            if(faixa.includes('azul')) return 'azul';
+            if(faixa.includes('roxa')) return 'roxa';
+            if(faixa.includes('marrom')) return 'marrom';
+            if(faixa.includes('preta')) return 'preta';
+            return 'branca';
+        }
+    </script>
+</body>
+</html>

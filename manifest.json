@@ -1,0 +1,20 @@
+{
+  "short_name": "BTT Check",
+  "name": "BTT Check & Graduação",
+  "icons": [
+    {
+      "src": "logo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#06090e",
+  "theme_color": "#0284c7",
+  "display": "standalone"
+}
