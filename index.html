@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BTT Check & Graduação</title>
     
-    <!-- Configurações PWA (Aplicativo Web Progressivo) -->
+    <!-- Configurações PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0284c7">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -37,7 +37,7 @@
 </head>
 <body>
 
-    <!-- TELA DE SELEÇÃO INICIAL (PASSO 1: LOCALIDADE -> PASSO 2: TURMA) -->
+    <!-- TELA DE SELEÇÃO INICIAL -->
     <div id="homeScreen" class="screen-overlay">
         <div class="home-container" style="text-align: center;">
             <img src="logo.png" alt="BTT Logo" class="home-logo-img" onerror="this.src='input_file_0.png'">
@@ -61,10 +61,10 @@
                 </div>
             </div>
 
-            <!-- ETAPA 2: TURMA (Oculta inicialmente) -->
+            <!-- ETAPA 2: TURMA -->
             <div id="etapaTurma" style="display: none;">
                 <div style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 1rem;">
-                    <button class="btn btn-secondary btn-sm" onclick="voltarParaLocalidade()">Alterar Local</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="voltarParaLocalidade()">Alterar Local</button>
                 </div>
                 <div class="turmas-grid">
                     <div class="turma-card faixa-azul" onclick="selecionarTurmaPasso('Adulto')">
@@ -83,7 +83,6 @@
 
     <!-- APLICAÇÃO PRINCIPAL -->
     <div id="appContainer" style="display: none;">
-        <!-- BARRA LATERAL (MENU) -->
         <aside>
             <div>
                 <div class="logo">
@@ -95,17 +94,16 @@
                     <span id="badgeTurma" class="turma-badge-header" style="margin-top: 4px;">Adulto</span>
                 </div>
                 <ul class="menu">
-                    <li><button onclick="mudarAba('scanner')" id="btnTabScanner" class="active">Check Diário</button></li>
-                    <li><button onclick="mudarAba('cadastro')" id="btnTabCadastro">Cadastrar Aluno</button></li>
-                    <li><button onclick="mudarAba('relatorio')" id="btnTabRelatorio">Relatório & Graduação</button></li>
+                    <li><button type="button" onclick="mudarAba('scanner')" id="btnTabScanner" class="active">Check Diário</button></li>
+                    <li><button type="button" onclick="mudarAba('cadastro')" id="btnTabCadastro">Cadastrar Aluno</button></li>
+                    <li><button type="button" onclick="mudarAba('relatorio')" id="btnTabRelatorio">Relatório & Graduação</button></li>
                 </ul>
             </div>
             <div>
-                <button class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 1rem;" onclick="voltarHome()">Trocar Local / Turma</button>
+                <button type="button" class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 1rem;" onclick="voltarHome()">Trocar Local / Turma</button>
             </div>
         </aside>
 
-        <!-- CONTEÚDO PRINCIPAL -->
         <main>
             <header>
                 <h1 id="tituloPagina">Check Diário de Presença</h1>
@@ -115,9 +113,11 @@
             <!-- ABA 1: CHECK DIÁRIO -->
             <div id="scanner" class="tab-content active">
                 <div class="card">
+                    <!-- BARRA DE PESQUISA E FILTROS A-Z E FAIXA -->
                     <div style="display: flex; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap;">
-                        <input type="text" id="buscaAluno" class="form-control" placeholder="Buscar aluno por nome..." oninput="filtrarAlunos()" style="flex: 1; min-width: 200px;">
-                        <select id="filtroFaixa" class="form-control" onchange="filtrarAlunos()" style="width: 180px;">
+                        <input type="text" id="buscaAluno" class="form-control" placeholder="Buscar aluno por nome..." oninput="filtrarEOrdenarAlunos()" style="flex: 1; min-width: 180px;">
+                        
+                        <select id="filtroFaixa" class="form-control" onchange="filtrarEOrdenarAlunos()" style="width: 160px;">
                             <option value="">Todas as Faixas</option>
                             <option value="Faixa Branca">Faixa Branca</option>
                             <option value="Cinza e Branca">Cinza e Branca</option>
@@ -137,11 +137,17 @@
                             <option value="Faixa Marrom">Faixa Marrom</option>
                             <option value="Faixa Preta">Faixa Preta</option>
                         </select>
+
+                        <select id="ordemAlfabetica" class="form-control" onchange="filtrarEOrdenarAlunos()" style="width: 140px;">
+                            <option value="az">Ordem A-Z</option>
+                            <option value="za">Ordem Z-A</option>
+                        </select>
                     </div>
+
                     <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
-                        <button class="btn btn-secondary btn-sm" onclick="marcarTodos(true)">Marcar Todos</button>
-                        <button class="btn btn-secondary btn-sm" onclick="marcarTodos(false)">Desmarcar Todos</button>
-                        <button class="btn btn-danger btn-sm" onclick="fecharDia()">Fechar o Dia</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="marcarTodos(true)">Marcar Todos</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="marcarTodos(false)">Desmarcar Todos</button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="fecharDia()">Fechar o Dia</button>
                     </div>
                 </div>
 
@@ -295,10 +301,10 @@
                 let resposta = await fetch(url);
                 let dadosCru = await resposta.json();
                 
-                listaAlunos = dadosCru.map(item => ({
-                    id: item.id || item.ID || item.Id,
-                    nome: item.nome || item.Nome || item.NOME,
-                    faixa: item.faixa || item.Faixa || item.FAIXA,
+                listaAlunos = dadosCru.map((item, index) => ({
+                    id: String(item.id || item.ID || item.Id || (index + 1)),
+                    nome: item.nome || item.Nome || item.NOME || '',
+                    faixa: item.faixa || item.Faixa || item.FAIXA || 'Faixa Branca',
                     graus: parseInt(item.graus || item.Graus || item.GRAUS || 0),
                     dias: parseInt(item.dias || item.Dias || item.DIAS || 0),
                     presencasHoje: String(item.presencasHoje || item.PresencasHoje || item.PRESENCASHOJE || false).toLowerCase() === 'true',
@@ -352,12 +358,34 @@
             const tbody = document.getElementById('tabelaChamadaBody');
             tbody.innerHTML = '';
 
-            if(listaAlunos.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color: var(--text-muted);">Nenhum aluno cadastrado nesta categoria/localidade.</td></tr>`;
+            let termo = document.getElementById('buscaAluno').value.toLowerCase();
+            let faixaFiltro = document.getElementById('filtroFaixa').value.toLowerCase();
+            let ordem = document.getElementById('ordemAlfabetica').value;
+
+            // Filtrar alunos
+            let alunosFiltrados = listaAlunos.filter(aluno => {
+                let nomeMatch = (aluno.nome || '').toLowerCase().includes(termo);
+                let faixaMatch = faixaFiltro === '' || (aluno.faixa || '').toLowerCase().includes(faixaFiltro);
+                return nomeMatch && faixaMatch;
+            });
+
+            // Ordenar A-Z ou Z-A
+            alunosFiltrados.sort((a, b) => {
+                let nomeA = (a.nome || '').toLowerCase();
+                let nomeB = (b.nome || '').toLowerCase();
+                if (ordem === 'az') {
+                    return nomeA.localeCompare(nomeB);
+                } else {
+                    return nomeB.localeCompare(nomeA);
+                }
+            });
+
+            if(alunosFiltrados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color: var(--text-muted);">Nenhum aluno encontrado com esses filtros.</td></tr>`;
                 return;
             }
 
-            listaAlunos.forEach(aluno => {
+            alunosFiltrados.forEach(aluno => {
                 let tr = document.createElement('tr');
                 let percentual = Math.min(100, Math.round((aluno.dias / 120) * 100));
                 
@@ -374,7 +402,7 @@
                         </div>
                     </td>
                     <td style="text-align: right;">
-                        <button class="btn btn-sm ${aluno.presencasHoje ? 'btn-danger' : 'btn'}" onclick="alternarPresenca('${aluno.id}')">
+                        <button type="button" class="btn btn-sm ${aluno.presencasHoje ? 'btn-danger' : 'btn'}" onclick="alternarPresenca('${aluno.id}')">
                             ${aluno.presencasHoje ? 'Presença Confirmada (Remover)' : 'Dar Check'}
                         </button>
                     </td>
@@ -383,11 +411,17 @@
             });
         }
 
+        function filtrarEOrdenarAlunos() {
+            renderizarScanner();
+        }
+
         function renderizarRelatorio() {
             const tbody = document.getElementById('tabelaRelatorioBody');
             tbody.innerHTML = '';
 
-            listaAlunos.forEach(aluno => {
+            let copiaAlunos = [...listaAlunos].sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+
+            copiaAlunos.forEach(aluno => {
                 let tr = document.createElement('tr');
                 let percentual = Math.min(100, Math.round((aluno.dias / 120) * 100));
 
@@ -408,7 +442,7 @@
                         </div>
                     </td>
                     <td style="text-align: right;">
-                        <button class="btn btn-secondary btn-sm" onclick="editarAluno('${aluno.id}')">Editar</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="editarAluno('${aluno.id}')">Editar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -432,23 +466,14 @@
         }
 
         function alternarPresenca(id) {
-            let aluno = listaAlunos.find(a => a.id == id);
+            let aluno = listaAlunos.find(a => String(a.id) === String(id));
             if(aluno) {
                 aluno.presencasHoje = !aluno.presencasHoje;
                 aluno.dias = aluno.presencasHoje ? aluno.dias + 1 : Math.max(0, aluno.dias - 1);
                 
-                atualizarAlunoNaPlanilha(aluno);
                 renderizarScanner();
+                atualizarAlunoNaPlanilha(aluno);
             }
-        }
-
-        function filtrarAlunos() {
-            let termo = document.getElementById('buscaAluno').value.toLowerCase();
-            let rows = document.querySelectorAll('#tabelaChamadaBody tr');
-            rows.forEach(row => {
-                let texto = row.innerText.toLowerCase();
-                row.style.display = texto.includes(termo) ? '' : 'none';
-            });
         }
 
         function marcarTodos(status) {
@@ -474,7 +499,7 @@
         }
 
         function editarAluno(id) {
-            let aluno = listaAlunos.find(a => a.id == id);
+            let aluno = listaAlunos.find(a => String(a.id) === String(id));
             if(!aluno) return;
             
             let novoNome = prompt("Editar Nome do Aluno:", aluno.nome);
